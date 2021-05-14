@@ -1,13 +1,15 @@
 #!/bin/bash          
 
   # input parameters. -f = name of report
-  while getopts p:f: flag
+  while getopts f:b: flag
   do
       case "${flag}" in
            f) CONTENTFILE=${OPTARG};;
+           b) Branch=${OPTARG};;
       esac
   done
-  echo "input report name:"$CONTENTFILE":"
+  echo "input report name:"$CONTENTFILE
+  echo "Feature branch name:"$Branch
 
   #user for CLI access
   ID="sasdemo"
@@ -57,15 +59,30 @@
 
     echo "created JSON file: "$JSONFILENAME" based on export package: "$EXPORTID
 
-    #connect to git project
+    #set git settings
     git config --global user.name "Richard Down"
-    git config --global user.email "richard.down@sas.com"  
+    git config --global user.email "richard.down@yahoo.co.uk"  
  
-    git clone https://gitlab.sas.com/sukrdo/sukrdo-devops-project.git
-    cd sukrdo-devops-project
-    git add README.md
-    git commit -m "add README"
-    git push -u origin master
+    #clean up local Git Repo
+    rm -rf SAS-VA-Export-Testing
+    
+    #clone the remote repo
+    git clone git@github.com:RichardDown/SAS-VA-Export-Testing.git
+
+
+    #add new feature branch and switch
+    git branch $Branch master
+    git checkout $Branch
+echo "branched and moved over"    
+    #add the output transfer package file
+    git add transferpackage.json
+echo "added file"
+    #commit the new file and name it with the report name
+    git commit -m "VA Report: $CONTENTFILE"
+echo "commited change"
+    # Push loca repo to remote repo
+    git push git@github.com:RichardDown/SAS-VA-Export-Testing.git $Branch
+echo "pushed to branch"
 
 else
    echo "report not found"
